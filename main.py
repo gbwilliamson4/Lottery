@@ -18,6 +18,10 @@ def main():
         all_data = db.select_all()
         for row in all_data:
             st.write(row[0])
+            # Making a change
+
+    if st.button('newbuttion'):
+        pass
 
 
 if __name__ == '__main__':
