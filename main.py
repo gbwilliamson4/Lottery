@@ -72,6 +72,10 @@ def main():
         calculate_winner(player_list, winning_nums, 1, todays_date)
         # db.store_winning_nums(winning_nums, todays_date)
 
+    if st.button('Statistics'):
+        checkscan_trends_graphs()
+        winner_trends_graph()
+
 
 def calculate_winner(player_list, winning_nums, gamemode, todays_date):
     if gamemode == 1:  # 1 is the normal gamemode. I'll do that one first then get the other ones going.
@@ -111,25 +115,89 @@ def calculate_winner(player_list, winning_nums, gamemode, todays_date):
     db.log_winner(winner.playerID, gamemode, todays_date)
 
 
-def figure_out_graphs():
-    # Ok, we can save the date correctly.
-    # Now, we need to get the date from the db and be able to treat it as a date
-    df = db.date_testing3()
-    df['ScanDate'] = pd.to_datetime(df['ScanDate'])
-    st.bar_chart(df)
-    st.line_chart(df)
-    print(df)
+def checkscan_trends_graphs():
+    # Write the queries and then pass it through to the db class to return a dataframe
+    # Dataframe will then be passed into the chart functions to render a beautiful chart
+
+    st.header('Overall Checkscan Trends')
+    query_line = '''select scandate, nonerisa, erisa, cafeteria, operating, sum(nonerisa + erisa + cafeteria + operating) 
+            as Totals from (select * from checkscan order by scandate desc limit 30) group by ScanDate'''
+    query_bar = '''select scandate, nonerisa, erisa, cafeteria, operating 
+                from (select * from checkscan order by scandate desc limit 30) group by ScanDate'''
+
+    # get data for bar chart
+    df_bar = db.graph_query(query_bar)
+    df_bar['ScanDate'] = pd.to_datetime(df_bar['ScanDate'])
+    df_bar = df_bar.set_index('ScanDate')
+
+    # get data for line chart
+    df_line = db.graph_query(query_line)
+    df_line['ScanDate'] = pd.to_datetime(df_line['ScanDate']).dt.date
+    df_line = df_line.set_index('ScanDate')
+
+    st.bar_chart(df_bar)
+    st.line_chart(df_line)
+
+    df_line = df_line.sort_values(by='ScanDate', ascending=False)
+    st.dataframe(df_line)
 
 
-def read_from_excel(): # This is used for getting dummy data into the db for testing
+def winner_trends_graph():
+    st.header('Player Wins Statistics')
+    query = '''select w.WinDate, p.PlayerName as Player, g.GamemodeName as Game_Mode FROM
+            Players p
+            left join(select WinnersID, PlayerID, GamemodeID, WinDate from Winners) w
+            on w.PlayerID = p.PlayerID
+            left join(select GamemodeID, GamemodeName from Gamemode) g
+            on w.GamemodeID = g.GamemodeID
+            order by w.WinnersID desc'''
+    df = db.graph_query(query)
+    df['WinDate'] = pd.to_datetime(df['WinDate']).dt.date
+    df = df.set_index('WinDate')
+
+    col1, col2, col3 = st.columns(3)
+    # Show in dataframe format
+    with col1:
+        df_30 = df.iloc[:30]
+        st.write('Last 30 Days')
+        st.dataframe(df_30)
+
+    with col2:
+        st.write('Last 7 Days')
+        df_7 = df.iloc[:7]
+        st.dataframe(df_7)
+
+    with col3:
+        st.write('All History')
+        st.dataframe(df)
+
+    st.subheader('Win Counts')
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        df_stats_30 = df_30.groupby(['Player']).size().reset_index(name='Win Count')
+        df_stats_30 = df_stats_30.set_index('Player')
+        st.dataframe(df_stats_30)
+
+    with col2:
+        df_stats_7 = df_7.groupby(['Player']).size().reset_index(name='Win Count')
+        df_stats_7 = df_stats_7.set_index('Player')
+        st.dataframe(df_stats_7)
+
+    with col3:
+        df_stats_all = df.groupby(['Player']).size().reset_index(name='Win Count')
+        df_stats_all = df_stats_all.set_index('Player')
+        st.dataframe(df_stats_all)
+
+
+def read_from_excel():  # This is used for getting dummy data into the db for testing
     df = pd.read_csv('''C:\\Users\\George\\Desktop\\Checkscan Dummy Data.csv''')
     # df.to_sql('checkscan', db.con, if_exists='append', index=False)
-    db.inserting_dummy_data(df)
+    db.inserting_dummy_data(df, 'Winners')
 
 
 if __name__ == '__main__':
     db = DB()
+    main()
     # db.create_table()
-    # main()
-    figure_out_graphs()
     # read_from_excel()
+    # winner_trends_graph()

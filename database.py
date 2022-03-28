@@ -55,8 +55,11 @@ class DB:
         result = pd.read_sql(query, self.con)
         return result
 
-    def date_testing3(self):
-        query = f'''select ScanDate, nonerisa, erisa, cafeteria, operating from checkscan'''
+    def graph_query(self, query):
+        # this function will query the database to return info for graphs.
+        # query = f'''select ScanDate, nonerisa, erisa, cafeteria, operating from checkscan'''
+        # query = f'''select scandate, sum(nonerisa + erisa + cafeteria + operating) as Totals from checkscan group by scandate'''
+        # query = f'''select scandate, nonerisa, erisa, cafeteria, operating, sum(nonerisa + erisa + cafeteria + operating) as Totals from checkscan group by scandate'''
         result = pd.read_sql(query, self.con)
         return result
 
