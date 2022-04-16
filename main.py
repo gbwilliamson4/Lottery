@@ -70,7 +70,7 @@ def main():
 
     if st.button('Calculate Winner'):
         calculate_winner(player_list, winning_nums, 1, todays_date)
-        # db.store_winning_nums(winning_nums, todays_date)
+        db.store_winning_nums(winning_nums, todays_date)
 
     if st.button('Statistics'):
         checkscan_trends_graphs()
