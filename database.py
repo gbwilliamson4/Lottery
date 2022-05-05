@@ -1,6 +1,7 @@
 import sqlite3
 import pandas as pd
 
+
 class DB:
     def __init__(self):
         self.con = sqlite3.connect('lottery')
@@ -65,3 +66,15 @@ class DB:
 
     def inserting_dummy_data(self, df, table):
         df.to_sql(f'{table}', self.con, if_exists='append', index=False)
+
+    def submitted_guesses_count(self, todays_date):
+        query = f"select count(PlayerID) from PlayerGuesses where ScanDate = '{todays_date}'"
+        result = pd.read_sql(query, self.con)
+        result = result['count(PlayerID)'].values[0]
+        return result
+
+    def submitted_guesses(self, todays_date):
+        query = f"select p.PlayerName, g.NonErisa, G.Erisa, g.Cafeteria, g.Operating from PlayerGuesses g join " \
+                f"Players p on p.PlayerID = g.PlayerID where g.ScanDate = '{todays_date}' "
+        result = pd.read_sql(query, self.con)
+        return result
