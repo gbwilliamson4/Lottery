@@ -72,6 +72,11 @@ def main():
         calculate_winner(player_list, winning_nums, 1, todays_date)
         db.store_winning_nums(winning_nums, todays_date)
 
+    if st.button('View Guesses'):
+        player_count = len(player_list)
+        view_player_guesses(player_count, todays_date)
+        # st.write(guesses)
+
     if st.button('Statistics'):
         checkscan_trends_graphs()
         winner_trends_graph()
@@ -192,7 +197,24 @@ def winner_trends_graph():
 def read_from_excel():  # This is used for getting dummy data into the db for testing
     df = pd.read_csv('''C:\\Users\\George\\Desktop\\Checkscan Dummy Data.csv''')
     # df.to_sql('checkscan', db.con, if_exists='append', index=False)
-    db.inserting_dummy_data(df, 'Winners')
+    db.inserting_dummy_data(df, 'PlayerGuesses')
+
+
+def view_player_guesses(player_count, todays_date):
+    # First, we verify that all the guesses have been submitted
+    # query the db. If the count in player guesses for the current date is less than the active players, return nothing
+    # st.write(player_count)
+
+    # Gather the dataframe as well as the count of active players
+    submitted_guesses_count = db.submitted_guesses_count(todays_date)
+    guesses_df = db.submitted_guesses(todays_date)
+
+    if player_count != submitted_guesses_count:
+        st.write('You freaking cheater, not all guesses have been submitted.')
+    else:
+        st.dataframe(guesses_df)
+
+
 
 
 if __name__ == '__main__':
