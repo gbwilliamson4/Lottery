@@ -17,7 +17,7 @@ class DB:
         self.cur.execute('''CREATE TABLE names (fullname text)''')
 
     def select_all(self):
-        data = self.cur.execute('''select * from names''')
+        data = self.cur.execute('''select * from checkscan''')
         return data
 
     def get_players(self):

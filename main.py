@@ -197,7 +197,7 @@ def winner_trends_graph():
 def read_from_excel():  # This is used for getting dummy data into the db for testing
     df = pd.read_csv('''C:\\Users\\George\\Desktop\\Checkscan Dummy Data.csv''')
     # df.to_sql('checkscan', db.con, if_exists='append', index=False)
-    db.inserting_dummy_data(df, 'PlayerGuesses')
+    db.inserting_dummy_data(df, 'checkscan')
 
 
 def view_player_guesses(player_count, todays_date):
@@ -216,10 +216,10 @@ def view_player_guesses(player_count, todays_date):
 
 
 
-
 if __name__ == '__main__':
     db = DB()
     main()
+    # show_all()
     # db.create_table()
     # read_from_excel()
     # winner_trends_graph()
