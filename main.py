@@ -77,9 +77,13 @@ def main():
         view_player_guesses(player_count, todays_date)
         # st.write(guesses)
 
-    if st.button('Statistics'):
-        checkscan_trends_graphs()
-        winner_trends_graph()
+    # if st.button('Statistics'):
+    #     checkscan_trends_graphs()
+    #     winner_trends_graph()
+
+    # Lets have the stats permanently displayed instead of having to push a button.
+    checkscan_trends_graphs()
+    winner_trends_graph()
 
 
 def calculate_winner(player_list, winning_nums, gamemode, todays_date):
